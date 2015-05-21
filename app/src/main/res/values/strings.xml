@@ -1,0 +1,13 @@
+<resources>
+    <string name="app_name">BusHelperServer</string>
+
+    <string name="hello_world">Hello world!</string>
+    <string name="action_settings">Settings</string>
+    <string name="server_ip_hint">서버 IP 입력</string>
+    <string name="receive_text">받기</string>
+    <string name="latitude_hint">정류장 위도 입력</string>
+    <string name="longitude_hint">정류장 경도 입력</string>
+    <string name="set_text">설정</string>
+    <string name="set_current_gps_text">현재 위치로 GPS 설정</string>
+    <string name="input_bus_number">버스 번호 입력</string>
+</resources>
