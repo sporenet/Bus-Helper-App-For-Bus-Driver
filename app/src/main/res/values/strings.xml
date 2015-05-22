@@ -9,5 +9,6 @@
     <string name="longitude_hint">정류장 경도 입력</string>
     <string name="set_text">설정</string>
     <string name="set_current_gps_text">현재 위치로 GPS 설정</string>
+    <string name="input_bus_number_text">버스 번호를 입력하세요</string>
     <string name="input_bus_number">버스 번호 입력</string>
 </resources>

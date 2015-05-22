@@ -19,6 +19,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserFactory;
@@ -34,32 +35,71 @@ import java.util.TimerTask;
 
 
 public class MainActivity extends ActionBarActivity {
+    private static final String TAG = "MainActivity";
+
     PHPExecutor mPHPExecutor;
-    Button mSetCurrentGPSButton;
+
+    Button mBusNumberInfoButton;
+    Button mBusNumberInput0Button;
+    Button mBusNumberInput1Button;
+    Button mBusNumberInput2Button;
+    Button mBusNumberInput3Button;
+    Button mBusNumberInput4Button;
+    Button mBusNumberInput5Button;
+    Button mBusNumberInput6Button;
+    Button mBusNumberInput7Button;
+    Button mBusNumberInput8Button;
+    Button mBusNumberInput9Button;
+    Button mGPSInfoButton;
+
+    EditText mGPSLatitudeText;
+    EditText mGPSLongitudeText;
+
     LocationManager mLocationManager;
     LocationListener mLocationListener;
-    TextView mBusNumberTextView;
+
     float mStationLatitude = 0;
     float mStationLongitude = 0;
     float mCurrentLatitude = 0;
     float mCurrentLongitude = 0;
+
     TextToSpeech mTextToSpeech;
+
     private static final int MIN_TIME_BW_UPDATES_DISTANCE = 1000 * 10;       // 10초마다 업데이트
     private static final int MIN_TIME_BW_UPDATES_GETOFF = 1000 * 5;       // 5초마다 업데이트
     private static final int MIN_DISTANCE_CHANGE_FOR_UPDATES = 1; // 2m마다 업데이트
     private static final String mPHPFileAddr = "http://147.46.215.187:8080/topis/delete_off_table.php";
     private static final String mPHPResultAddr = "http://147.46.215.187:8080/topis/delete_off_result.xml";
     private static final String mBluetoothMacAddr = "D0:FF:50:66:94:D6";
-    private static final String TAG = "MainActivity";
-    String mBusNumber = null;
+
+    String mBusNumber = "";
+    String mBusNumberInfoText1 = "버스 번호 : ";
+    String mBusNumberInfoText2 = " (완료하려면 클릭)";
+    String mBusNumberInfoText3 = " (서비스 실행중)";
+    String mBusNumberInfoText;
+
+    boolean mIsBusNumberInputCompleted = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        mSetCurrentGPSButton = (Button)findViewById(R.id.setCurrentGPSButton);
-        mBusNumberTextView = (TextView)findViewById(R.id.currentBusNumText);
+        mBusNumberInfoButton = (Button)findViewById(R.id.busNumberInfoButton);
+        mBusNumberInput0Button = (Button)findViewById(R.id.busNumberInput0Button);
+        mBusNumberInput1Button = (Button)findViewById(R.id.busNumberInput1Button);
+        mBusNumberInput2Button = (Button)findViewById(R.id.busNumberInput2Button);
+        mBusNumberInput3Button = (Button)findViewById(R.id.busNumberInput3Button);
+        mBusNumberInput4Button = (Button)findViewById(R.id.busNumberInput4Button);
+        mBusNumberInput5Button = (Button)findViewById(R.id.busNumberInput5Button);
+        mBusNumberInput6Button = (Button)findViewById(R.id.busNumberInput6Button);
+        mBusNumberInput7Button = (Button)findViewById(R.id.busNumberInput7Button);
+        mBusNumberInput8Button = (Button)findViewById(R.id.busNumberInput8Button);
+        mBusNumberInput9Button = (Button)findViewById(R.id.busNumberInput9Button);
+        mGPSInfoButton = (Button)findViewById(R.id.gpsInfoButton);
+
+        mGPSLatitudeText = (EditText)findViewById(R.id.gpsLatText);
+        mGPSLongitudeText = (EditText)findViewById(R.id.gpsLonText);
 
         // 하차하려는 사람을 주기적으로 검사
         final Timer mTimer = new Timer();
@@ -97,29 +137,116 @@ public class MainActivity extends ActionBarActivity {
             }
         };
 
-        // 버스 번호 입력 다이얼로그
-        AlertDialog.Builder mBusNumberDialog = new AlertDialog.Builder(this);
-        mBusNumberDialog.setTitle(R.string.input_bus_number);
-
-        final EditText mBusNumberText = new EditText(this);
-        mBusNumberDialog.setView(mBusNumberText);
-
-        mBusNumberDialog.setPositiveButton("확인", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                mBusNumber = mBusNumberText.getText().toString();
-                mTimer.schedule(task, 0, MIN_TIME_BW_UPDATES_GETOFF);
-                mBusNumberTextView.setText(mBusNumber);
-            }
-        });
-
-        mBusNumberDialog.show();
-
-        mSetCurrentGPSButton.setOnClickListener(new View.OnClickListener() {
+        // 버스 번호 입력 부분
+        mBusNumberInfoText = mBusNumberInfoText1 + mBusNumberInfoText2;
+        mBusNumberInfoButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                mStationLatitude = mCurrentLatitude;
-                mStationLongitude = mCurrentLongitude;
+                mBusNumberInfoText = mBusNumberInfoText1 + mBusNumber + mBusNumberInfoText3;
+                mBusNumberInfoButton.setText(mBusNumberInfoText);
+                mTimer.schedule(task, 0, MIN_TIME_BW_UPDATES_GETOFF);
+                mBusNumberInfoButton.setEnabled(false);
+                mIsBusNumberInputCompleted = true;
+            }
+        });
+        mBusNumberInput0Button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (!mIsBusNumberInputCompleted) {
+                    mBusNumber += "0";
+                    mBusNumberInfoText = mBusNumberInfoText1 + mBusNumber + mBusNumberInfoText2;
+                    mBusNumberInfoButton.setText(mBusNumberInfoText);
+                }
+            }
+        });
+        mBusNumberInput1Button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (!mIsBusNumberInputCompleted) {
+                    mBusNumber += "1";
+                    mBusNumberInfoText = mBusNumberInfoText1 + mBusNumber + mBusNumberInfoText2;
+                    mBusNumberInfoButton.setText(mBusNumberInfoText);
+                }
+            }
+        });
+        mBusNumberInput2Button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (!mIsBusNumberInputCompleted) {
+                    mBusNumber += "2";
+                    mBusNumberInfoText = mBusNumberInfoText1 + mBusNumber + mBusNumberInfoText2;
+                    mBusNumberInfoButton.setText(mBusNumberInfoText);
+                }
+            }
+        });
+        mBusNumberInput3Button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (!mIsBusNumberInputCompleted) {
+                    mBusNumber += "3";
+                    mBusNumberInfoText = mBusNumberInfoText1 + mBusNumber + mBusNumberInfoText2;
+                    mBusNumberInfoButton.setText(mBusNumberInfoText);
+                }
+            }
+        });
+        mBusNumberInput4Button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (!mIsBusNumberInputCompleted) {
+                    mBusNumber += "4";
+                    mBusNumberInfoText = mBusNumberInfoText1 + mBusNumber + mBusNumberInfoText2;
+                    mBusNumberInfoButton.setText(mBusNumberInfoText);
+                }
+            }
+        });
+        mBusNumberInput5Button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (!mIsBusNumberInputCompleted) {
+                    mBusNumber += "5";
+                    mBusNumberInfoText = mBusNumberInfoText1 + mBusNumber + mBusNumberInfoText2;
+                    mBusNumberInfoButton.setText(mBusNumberInfoText);
+                }
+            }
+        });
+        mBusNumberInput6Button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (!mIsBusNumberInputCompleted) {
+                    mBusNumber += "6";
+                    mBusNumberInfoText = mBusNumberInfoText1 + mBusNumber + mBusNumberInfoText2;
+                    mBusNumberInfoButton.setText(mBusNumberInfoText);
+                }
+            }
+        });
+        mBusNumberInput7Button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (!mIsBusNumberInputCompleted) {
+                    mBusNumber += "7";
+                    mBusNumberInfoText = mBusNumberInfoText1 + mBusNumber + mBusNumberInfoText2;
+                    mBusNumberInfoButton.setText(mBusNumberInfoText);
+                }
+            }
+        });
+        mBusNumberInput8Button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (!mIsBusNumberInputCompleted) {
+                    mBusNumber += "8";
+                    mBusNumberInfoText = mBusNumberInfoText1 + mBusNumber + mBusNumberInfoText2;
+                    mBusNumberInfoButton.setText(mBusNumberInfoText);
+                }
+            }
+        });
+        mBusNumberInput9Button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (!mIsBusNumberInputCompleted) {
+                    mBusNumber += "9";
+                    mBusNumberInfoText = mBusNumberInfoText1 + mBusNumber + mBusNumberInfoText2;
+                    mBusNumberInfoButton.setText(mBusNumberInfoText);
+                }
             }
         });
 
@@ -132,29 +259,30 @@ public class MainActivity extends ActionBarActivity {
                 mLocationListener
         );
 
+        mGPSInfoButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // 무선 네트워크 사용 여부, GPS 연결 여부
+                boolean isInternetGPSEnabled = mLocationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
+                boolean isGPSEnabled = mLocationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
+                if (isInternetGPSEnabled && isGPSEnabled) {
+                    if (mGPSLatitudeText.getText().toString().equals("") || mGPSLongitudeText.getText().toString().equals("")) {
+                        Toast toast = Toast.makeText(getApplicationContext(), "위도와 경도를 올바르게 입력하세요", Toast.LENGTH_SHORT);
+                        toast.show();
+                    } else {
+                        mStationLatitude = Float.parseFloat(mGPSLatitudeText.getText().toString());
+                        mStationLongitude = Float.parseFloat(mGPSLongitudeText.getText().toString());
+                        Toast toast = Toast.makeText(getApplicationContext(), "GPS 좌표 전송 완료!", Toast.LENGTH_SHORT);
+                        toast.show();
+                    }
+                } else {
+                    Toast toast = Toast.makeText(getApplicationContext(), "GPS 기능을 실행시켜주세요", Toast.LENGTH_SHORT);
+                    toast.show();
+                }
+            }
+        });
+
         mTextToSpeech = new TextToSpeech(this, new TextToSpeechListener());
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_main, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        }
-
-        return super.onOptionsItemSelected(item);
     }
 
     public class PHPExecutor extends AsyncTask<String, Integer, String> {
