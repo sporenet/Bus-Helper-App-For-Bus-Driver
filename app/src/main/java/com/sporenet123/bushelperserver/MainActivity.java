@@ -55,6 +55,8 @@ public class MainActivity extends ActionBarActivity {
     EditText mGPSLatitudeText;
     EditText mGPSLongitudeText;
 
+    TextView mDebugTextView;
+
     LocationManager mLocationManager;
     LocationListener mLocationListener;
 
@@ -62,6 +64,7 @@ public class MainActivity extends ActionBarActivity {
     float mStationLongitude = 0;
     float mCurrentLatitude = 0;
     float mCurrentLongitude = 0;
+    float mDist = 0;
 
     TextToSpeech mTextToSpeech;
 
@@ -100,6 +103,8 @@ public class MainActivity extends ActionBarActivity {
 
         mGPSLatitudeText = (EditText)findViewById(R.id.gpsLatText);
         mGPSLongitudeText = (EditText)findViewById(R.id.gpsLonText);
+
+        mDebugTextView = (TextView)findViewById(R.id.debugTextView);
 
         // 하차하려는 사람을 주기적으로 검사
         final Timer mTimer = new Timer();
@@ -274,6 +279,10 @@ public class MainActivity extends ActionBarActivity {
                         mStationLongitude = Float.parseFloat(mGPSLongitudeText.getText().toString());
                         Toast toast = Toast.makeText(getApplicationContext(), "GPS 좌표 전송 완료!", Toast.LENGTH_SHORT);
                         toast.show();
+                        String debugText = "버스 위도 : " + Float.toString(mCurrentLatitude) + ", 버스 경도 : " + Float.toString(mCurrentLongitude) +
+                                "\n정류장 위도 : " + Float.toString(mStationLatitude) + " , 정류장 경도 : " + Float.toString(mStationLongitude) +
+                                "\n거리 : " + Float.toString(mDist);
+                        mDebugTextView.setText(debugText);
                     }
                 } else {
                     Toast toast = Toast.makeText(getApplicationContext(), "GPS 기능을 실행시켜주세요", Toast.LENGTH_SHORT);
@@ -322,8 +331,8 @@ public class MainActivity extends ActionBarActivity {
             if (location != null) {
                 mCurrentLatitude = (float)location.getLatitude();
                 mCurrentLongitude = (float)location.getLongitude();
-                float dist = distFrom(mCurrentLatitude, mCurrentLongitude, mStationLatitude, mStationLongitude);
-                if (dist < 50) {
+                mDist = distFrom(mCurrentLatitude, mCurrentLongitude, mStationLatitude, mStationLongitude);
+                if (mDist < 50) {
                     speakOutWaiting();
                 }
             }
