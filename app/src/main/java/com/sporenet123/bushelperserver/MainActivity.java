@@ -1,20 +1,14 @@
 package com.sporenet123.bushelperserver;
 
-import android.app.AlertDialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.AsyncTask;
-import android.os.Handler;
-import android.os.Message;
 import android.speech.tts.TextToSpeech;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -68,12 +62,19 @@ public class MainActivity extends ActionBarActivity {
 
     TextToSpeech mTextToSpeech;
 
-    private static final int MIN_TIME_BW_UPDATES_DISTANCE = 1000 * 10;       // 10초마다 업데이트
-    private static final int MIN_TIME_BW_UPDATES_GETOFF = 1000 * 5;       // 5초마다 업데이트
-    private static final int MIN_DISTANCE_CHANGE_FOR_UPDATES = 1; // 2m마다 업데이트
+    private static final int MIN_TIME_BW_UPDATES_DISTANCE = 1000 * 5;       // 10초마다 업데이트
+    private static final int MIN_TIME_BW_UPDATES_GETOFF = 1000 * 3;       // 5초마다 업데이트
+    private static final int MIN_DISTANCE_CHANGE_FOR_UPDATES = 1; // 1m마다 업데이트
     private static final String mPHPFileAddr = "http://147.46.215.187:8080/topis/delete_off_table.php";
     private static final String mPHPResultAddr = "http://147.46.215.187:8080/topis/delete_off_result.xml";
     private static final String mBluetoothMacAddr = "D0:FF:50:66:94:D6";
+
+    private static final String BUS_NUMBER_INDEX = "busnum";
+    private static final String BUS_NUMBER_INFO_TEXT_INDEX = "busnuminfotext";
+    private static final String IS_BUS_NUMBER_INPUT_COMPLETED_INDEX = "isbusnumberinputcompleted";
+    private static final String IS_GPS_READY_INDEX = "isgpsready";
+    private static final String STATION_LATITUDE_INDEX = "stationlatitude";
+    private static final String STATION_LONGITUDE_INDEX = "stationlongitude";
 
     String mBusNumber = "";
     String mBusNumberInfoText1 = "버스 번호 : ";
@@ -82,6 +83,7 @@ public class MainActivity extends ActionBarActivity {
     String mBusNumberInfoText;
 
     boolean mIsBusNumberInputCompleted = false;
+    boolean mIsGPSReady = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -279,10 +281,7 @@ public class MainActivity extends ActionBarActivity {
                         mStationLongitude = Float.parseFloat(mGPSLongitudeText.getText().toString());
                         Toast toast = Toast.makeText(getApplicationContext(), "GPS 좌표 전송 완료!", Toast.LENGTH_SHORT);
                         toast.show();
-                        String debugText = "버스 위도 : " + Float.toString(mCurrentLatitude) + ", 버스 경도 : " + Float.toString(mCurrentLongitude) +
-                                "\n정류장 위도 : " + Float.toString(mStationLatitude) + " , 정류장 경도 : " + Float.toString(mStationLongitude) +
-                                "\n거리 : " + Float.toString(mDist);
-                        mDebugTextView.setText(debugText);
+                        mIsGPSReady = true;
                     }
                 } else {
                     Toast toast = Toast.makeText(getApplicationContext(), "GPS 기능을 실행시켜주세요", Toast.LENGTH_SHORT);
@@ -332,6 +331,12 @@ public class MainActivity extends ActionBarActivity {
                 mCurrentLatitude = (float)location.getLatitude();
                 mCurrentLongitude = (float)location.getLongitude();
                 mDist = distFrom(mCurrentLatitude, mCurrentLongitude, mStationLatitude, mStationLongitude);
+                if (mIsGPSReady) {
+                    String debugText = "버스 위도 : " + Float.toString(mCurrentLatitude) + ", 버스 경도 : " + Float.toString(mCurrentLongitude) +
+                            "\n정류장 위도 : " + Float.toString(mStationLatitude) + " , 정류장 경도 : " + Float.toString(mStationLongitude) +
+                            "\n거리 : " + Float.toString(mDist);
+                    mDebugTextView.setText(debugText);
+                }
                 if (mDist < 50) {
                     speakOutWaiting();
                 }
